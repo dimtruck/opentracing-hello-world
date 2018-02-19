@@ -32,3 +32,9 @@ services:
         volumes:
             - ./db.sql:/docker-entrypoint-initdb.d/db.sql
             - ./:/opt/backup    
+    jaeger:
+        image: jaegertracing/all-in-one:latest
+        container_name: jaeger
+        ports:
+            - "16686:16686"
+            - "5775:5775/udp"

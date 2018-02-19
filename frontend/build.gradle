@@ -27,6 +27,9 @@ targetCompatibility = 1.8
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("org.springframework.boot:spring-boot-devtools")
+    compile "io.opentracing:opentracing-api:0.31.0"
+    compile "io.opentracing:opentracing-util:0.31.0"
+    compile "com.uber.jaeger:jaeger-core:0.24.0"
     compile 'com.google.code.gson:gson:2.8.2'
     compile "org.json:json:20171018"
     testCompile("junit:junit")
