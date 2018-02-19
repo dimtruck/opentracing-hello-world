@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Signed up</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous" />
+</head>
+<body>
+<h1>Result</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm">
+            <ul class="list-group">
+                <li class="list-group-item"  th:text="${customer.name}" />
+                <li class="list-group-item"  th:text="${customer.rcn}" />
+                <li class="list-group-item"  th:text="${customer.customerType}" />
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <table class="table">
+                <caption>Accounts</caption>
+                <thead>
+                <tr>
+                    <th scope="col">Account Id</th>
+                    <th scope="col">Domain</th>
+                    <th scope="col">Account Type</th>
+                    <th scope="col">Account Status</th>
+                    <th scope="col">Support Tier</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="account, stat : ${accountList}">
+                    <td th:text="${account.customerAccountId}" ></td>
+                    <td th:text="${account.domain}"></td>
+                    <td th:text="${account.customerAccountType}" ></td>
+                    <td th:text="${account.customerAccountStatus}" ></td>
+                    <td th:text="${account.supportTier}" ></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <table class="table">
+                <caption>Contacts</caption>
+                <thead>
+                <tr>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">User Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="contact, stat : ${contactList}">
+                    <td th:text="${contact.firstName}" ></td>
+                    <td th:text="${contact.lastName}"></td>
+                    <td th:text="${contact.username}" ></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--<a href="/adduser">Add a user to this account</a>-->
+</body>
+</html>
