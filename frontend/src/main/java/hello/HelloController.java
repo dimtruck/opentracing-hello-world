@@ -2,6 +2,7 @@ package hello;
 
 import com.google.gson.Gson;
 import domains.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,19 +11,17 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 
-@RestController
+@Controller
 public class HelloController {
 
     private static final Logger logger = LoggerFactory.getLogger(
@@ -34,9 +33,30 @@ public class HelloController {
 
 
     @GetMapping("/hello")
-    public String hello(Model model) {
-        logger.info("About to return a hello");
-        model.addAttribute("hello", new HelloWorld());
+    public String hello(Model model, @RequestParam(required = false) String language) {
+        logger.info("About to return a hello. {} {}", model, language);
+
+        List<Language> languageList = populateLanguages();
+
+        Language languageObject = null;
+
+        if (language != null && !language.isEmpty()) {
+            Optional<Language> languageOptional = languageList.stream().filter(
+                    language1 -> language1.getShortName().equals(language)).findFirst();
+            if (languageOptional.isPresent())
+                languageObject = languageOptional.get();
+        }
+
+        if (languageObject == null) {
+            languageObject = new Language();
+            languageObject.setShortName("en");
+        }
+        model.addAttribute("helloWorld", getHelloWorld(languageObject));
+
+        model.addAttribute("language", new HelloWorldRequest());
+        model.addAttribute("allLanguages", languageList);
+
+        logger.info("language", new Language());
         return "hello";
     }
 
@@ -46,7 +66,7 @@ public class HelloController {
     }
 
     @PostMapping("/hello")
-    public String hello(@ModelAttribute HelloWorld helloWorld, Model model) {
+    public String hello(@ModelAttribute HelloWorldRequest helloWorld, Model model) {
         logger.info("About to create a hello " + helloWorld);
 
         String apiEndpoint = this.apiUrl + "/languages";
@@ -86,11 +106,64 @@ public class HelloController {
             return "error";
         }
 
-        return "result";
+
+        List<Language> languageList = populateLanguages();
+
+        Language languageObject = new Language();
+        languageObject.setShortName("en");
+
+        model.addAttribute("helloWorld", getHelloWorld(languageObject));
+
+        model.addAttribute("language", new HelloWorldRequest());
+        model.addAttribute("allLanguages", languageList);
+
+
+        return "hello";
     }
 
-    @ModelAttribute("allLanguages")
-    public List<Language> populateLanguages() {
+    private HelloWorld getHelloWorld(Language language) {
+        logger.info("About to get hello world");
+
+        String apiEndpoint = this.apiUrl + "/helloWorld/" + language.getShortName();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Accept", "application/json");
+        httpHeaders.remove("Accept-Charset");
+
+        logger.info("Inject headers: " + httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        StringHttpMessageConverter converter = new StringHttpMessageConverter();
+        converter.setWriteAcceptCharset(false);
+        restTemplate.getMessageConverters().add(0, converter);
+
+        ResponseEntity<String> response = null;
+
+        try {
+            response = restTemplate.getForEntity(apiEndpoint, String.class);
+
+        } catch (RestClientException rce) {
+            rce.printStackTrace();
+
+            return new HelloWorld();
+        }
+
+        logger.info("RESULT: " + response.getStatusCodeValue() + " " + response.getBody());
+
+        if (response.getStatusCodeValue() != 200) {
+            return new HelloWorld();
+        }
+
+        JSONObject jsonObject = new JSONObject(response.getBody());
+
+        if (jsonObject.has("text")) {
+            return new HelloWorld(language, jsonObject.getString("text"));
+        } else {
+            return new HelloWorld();
+        }
+    }
+
+    private List<Language> populateLanguages() {
         logger.info("About to populate languages");
 
         String apiEndpoint = this.apiUrl + "/languages";
@@ -123,11 +196,11 @@ public class HelloController {
             return Collections.emptyList();
         }
 
-        JSONObject jsonObject = new JSONObject(response.getBody());
+        JSONArray jsonArray = new JSONArray(response.getBody());
         List<Language> languageList = new ArrayList<>();
 
 
-        for (Object language: languageList) {
+        for (Object language: jsonArray) {
             JSONObject languageJsonObject = (JSONObject)language;
             languageList.add(new Language(
                     languageJsonObject.getString("long"),

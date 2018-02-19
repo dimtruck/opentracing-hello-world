@@ -6,33 +6,71 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous" />
 </head>
 <body>
-<h1>Form</h1>
+<h1 style="text-align: center;">Enterprise Hello World</h1>
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm">
-<form action="#" th:action="@{/hello}" th:object="${hello}" method="post">
-    <div class="form-group">
-        <label for="language">Language: </label>
-        <input type="text"
-               class="form-control" id="language"
-               aria-describedby="languagehelp" name="language"
-               th:field="*{language}" placeholder="enter language" />
-        <small id="languagehelp" class="form-text text-muted">This has to be unique</small>
+            <h2 style="color: blue; padding: 2em; text-align: center;" th:text="${helloWorld.translation}">hello world</h2>
+        </div>
     </div>
+
+    <div class="row">
+        <div class="col-sm">
+            <fieldset class="hello-world-pick">
+                <legend>Pick a language to say "hello world" in</legend>
+            <select th:field="*{language}" id="language">
+                <option value="" selected="selected">Select One</option>
+                <option th:each="language : ${allLanguages}"
+                        th:value="${language.shortName}"
+                        th:text="${language.longName}">Wireframe</option>
+            </select>
+            </fieldset>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <fieldset class="add-language">
+                <legend>Add a language</legend>
+
+            <form action="#" th:action="@{/hello}" th:object="${language}" method="post">
+    <div class="form-group">
+        <label for="shortName">Language abbreviation: </label>
+        <input type="text"
+               class="form-control" id="shortName"
+               aria-describedby="shorthelp" name="short"
+               th:field="*{shortName}" placeholder="enter abbreviation" />
+        <small id="shorthelp" class="form-text text-muted">This has to be unique</small>
+    </div>
+    <div class="form-group">
+        <label for="longName">Language full name: </label>
+        <input type="text"
+               class="form-control" id="longName"
+               aria-describedby="longhelp" name="longName"
+               th:field="*{longName}" placeholder="enter name" />
+        <small id="longhelp" class="form-text text-muted">This has to be unique</small>
+    </div>
+                <div class="form-group">
+                    <label for="translation">Translation: </label>
+                    <input type="text"
+                           class="form-control" id="translation"
+                           aria-describedby="translationhelp" name="translation"
+                           th:field="*{translation}" placeholder="enter translation" />
+                    <small id="translationhelp" class="form-text text-muted">This has to be unique</small>
+                </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Add a language!</button>
     </div>
 </form>
+            </fieldset>
         </div>
     </div>
-    <div class="row">
-        <div class="col-sm">
-            <select th:field="*{language}">
-                <option th:each="language : ${allLanguages}"
-                        th:value="${language.id}"
-                        th:text="${language.type}">Wireframe</option>
-            </select>
-        </div>
-    </div>
+</div>
+<script type="text/javascript">
+    document.getElementById("language").addEventListener("change", function(e){
+        console.log(e.target);
+        console.log(e.target.value);
+        window.location.href="/hello?language=" + e.target.value;
+    });
+</script>
 </body>
 </html>

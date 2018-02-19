@@ -1,0 +1,4 @@
+pika
+gunicorn
+psycopg2
+redis

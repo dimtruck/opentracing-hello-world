@@ -13,14 +13,12 @@ package main
 import (
 	"log"
 	"net/http"
-
-	service "github.com/dimtruck/opentracing-hello-world/api"
 )
 
 func main() {
 	log.Printf("Server started")
 
-	router := service.NewRouter()
+	router := NewRouter()
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

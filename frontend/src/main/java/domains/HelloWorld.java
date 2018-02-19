@@ -2,6 +2,12 @@ package domains;
 
 public class HelloWorld {
 
+    public HelloWorld() {}
+    public HelloWorld(Language language, String translation) {
+        this.language = language;
+        this.translation = translation;
+    }
+
     private Language language;
 
     public Language getLanguage() {
@@ -12,21 +18,21 @@ public class HelloWorld {
         this.language = language;
     }
 
-    public String getText() {
-        return text;
+    public String getTranslation() {
+        return translation;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setTranslation(String translation) {
+        this.translation = translation;
     }
 
-    private String text;
+    private String translation;
 
     @Override
     public String toString() {
         return "HelloWorld{" +
                 "language='" + language.getLongName() + '\'' +
-                ", test='" + text + '\'' +
+                ", translation='" + translation + '\'' +
                 '}';
     }
 }

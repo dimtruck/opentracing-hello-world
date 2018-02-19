@@ -59,4 +59,11 @@ var routes = Routes{
 		"/languages",
 		GetLanguages,
 	},
+
+	Route{
+		"GetLanguages",
+		strings.ToUpper("Get"),
+		"/helloWorld/{language}",
+		GetHelloWorld,
+	},
 }

@@ -7,6 +7,10 @@ public class Language {
         this.longName = longName;
     }
 
+    public Language() {
+
+    }
+
     private String longName;
 
     public String getLongName() {

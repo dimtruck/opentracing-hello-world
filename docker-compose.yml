@@ -1,4 +1,4 @@
-version: 3
+version: "3"
 
 services:
     frontend:
@@ -8,4 +8,27 @@ services:
         depends_on:
             - api
     api:
-        build: api
+        build: api/
+        environment:
+            DEBUG: 'true'
+    publisher:
+        build: publisher/
+        environment:
+            DEBUG: 'true'
+    consumer:
+        build: subscriber/
+        environment:
+            DEBUG: 'true'
+    rabbitmq:
+        image: rabbitmq:3
+        hostname: rabbitmq
+    redis:
+        image: redis
+    postgres:
+        image: postgres
+        environment: 
+            - POSTGRES_USER=helloworld
+            - POSTGRES_DB=helloworld_db
+        volumes:
+            - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+            - ./:/opt/backup    
