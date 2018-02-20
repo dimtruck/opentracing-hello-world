@@ -6,6 +6,8 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	opentracing "github.com/opentracing/opentracing-go"
+	ext "github.com/opentracing/opentracing-go/ext"
 )
 
 func getDB() *sql.DB {
@@ -17,7 +19,14 @@ func getDB() *sql.DB {
 
 }
 
-func GetAllLanguages() []Language {
+func GetAllLanguages(span opentracing.Span) []Language {
+	childSpan := opentracing.StartSpan(
+		"get all languages",
+		opentracing.ChildOf(span.Context()))
+	ext.DBType.Set(childSpan, "postgres")
+
+	defer childSpan.Finish()
+
 	db := getDB()
 	defer db.Close()
 
@@ -41,11 +50,13 @@ func GetAllLanguages() []Language {
 	return result
 }
 
-func Insert() {
+func GetTranslationByLanguage(language string, span opentracing.Span) string {
+	childSpan := opentracing.StartSpan(
+		"get translation by language",
+		opentracing.ChildOf(span.Context()))
+	ext.DBType.Set(childSpan, "postgres")
+	defer childSpan.Finish()
 
-}
-
-func GetTranslationByLanguage(language string) string {
 	db := getDB()
 	defer db.Close()
 
