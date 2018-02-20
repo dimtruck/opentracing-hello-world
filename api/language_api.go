@@ -8,6 +8,9 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
+
+	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 )
 
 type NewTranslationRequest struct {
@@ -17,6 +20,21 @@ type NewTranslationRequest struct {
 }
 
 func AddLanguage(w http.ResponseWriter, r *http.Request) {
+	var serverSpan opentracing.Span
+	appSpecificOperationName := "Add Language"
+	wireContext, err := opentracing.GlobalTracer().Extract(
+		opentracing.HTTPHeaders,
+		opentracing.HTTPHeadersCarrier(r.Header))
+	if err != nil {
+		log.WithField("request", err).Error("Unable to extract span context")
+	}
+
+	serverSpan = opentracing.StartSpan(
+		appSpecificOperationName,
+		ext.RPCServerOption(wireContext))
+
+	defer serverSpan.Finish()
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// call a pub sub python thingie
@@ -37,10 +55,29 @@ func AddLanguage(w http.ResponseWriter, r *http.Request) {
 
 		log.WithField("request", body).Info("Send a new request ")
 
-		http.Post(
-			fmt.Sprintf("%s/publish", PUBLISHER_ENDPOINT),
-			"application/json", bytes.NewBuffer(body))
-		w.WriteHeader(http.StatusCreated)
+		childSpan := opentracing.StartSpan(
+			"add language",
+			opentracing.ChildOf(serverSpan.Context()))
+		ext.SpanKindRPCClient.Set(childSpan)
+		defer childSpan.Finish()
+
+		httpClient := &http.Client{}
+		httpReq, _ := http.NewRequest(
+			"POST", fmt.Sprintf("%s/publish", PUBLISHER_ENDPOINT), bytes.NewBuffer(body))
+
+		opentracing.GlobalTracer().Inject(
+			childSpan.Context(),
+			opentracing.HTTPHeaders,
+			opentracing.HTTPHeadersCarrier(httpReq.Header))
+
+		_, err = httpClient.Do(httpReq)
+
+		if err != nil {
+			log.WithField("request", err).Error("Unable to add language")
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusCreated)
+		}
 	}
 
 }
@@ -48,7 +85,22 @@ func AddLanguage(w http.ResponseWriter, r *http.Request) {
 func GetLanguages(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Get languages")
 
-	languages := GetAllLanguages()
+	var serverSpan opentracing.Span
+	appSpecificOperationName := "Get Languages"
+	wireContext, err := opentracing.GlobalTracer().Extract(
+		opentracing.HTTPHeaders,
+		opentracing.HTTPHeadersCarrier(r.Header))
+	if err != nil {
+		log.WithField("request", err).Error("Unable to extract span context")
+	}
+
+	serverSpan = opentracing.StartSpan(
+		appSpecificOperationName,
+		ext.RPCServerOption(wireContext))
+
+	defer serverSpan.Finish()
+
+	languages := GetAllLanguages(serverSpan)
 
 	languagesJSON, err := json.Marshal(languages)
 
@@ -59,9 +111,4 @@ func GetLanguages(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(languagesJSON)
 	}
-}
-
-func UpdateApp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
 }
