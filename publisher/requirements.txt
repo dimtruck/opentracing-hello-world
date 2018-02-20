@@ -1,3 +1,4 @@
 falcon
 pika
 gunicorn
+jaeger-client

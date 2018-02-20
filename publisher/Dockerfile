@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:2
 
 COPY . /opt
 
@@ -6,4 +6,4 @@ WORKDIR /opt
 
 RUN pip install -r requirements.txt
 
-CMD gunicorn -b 0.0.0.0:8000 app:api
+CMD gunicorn -c gunicorn.py app:api
