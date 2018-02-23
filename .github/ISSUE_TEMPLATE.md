@@ -1,9 +1,9 @@
 <!--
 Welcome to the OpenTracing Hello World repo
 
-- Please search for existing issues in order to ensure we don't have duplicate bugs/feature requests.)
-- Please be respectful and considerate of others when commenting on issues)
-- Please provide as much information as possible so we all understand the issue.)
+- Please search for existing issues in order to ensure we don't have duplicate bugs/feature requests.
+- Please be respectful and considerate of others when commenting on issues.
+- Please provide as much information as possible so we all understand the issue.
 - Please don't ask questions here. If you have any question head to our gitter chat https://gitter.im/opentracing/public
 -->
 
